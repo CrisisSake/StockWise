@@ -1,6 +1,8 @@
 from keras.models import Model
 from keras.layers import Dense, Dropout, LSTM, Input, Activation
 from keras import optimizers
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def buildModelFinance(backcandles, data_set):
     lstm_input = Input(shape=(backcandles, data_set.shape[1]), name='lstm_input')

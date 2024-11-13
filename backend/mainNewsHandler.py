@@ -30,9 +30,11 @@ def handleNewsResponse(companyName):
         responseMessage2 = "HTTP Request Failed"
     elif pulseResponse == -2:
         responseMessage2 = "No News Found on PULSE (Issue on Pulse)"
+        pulseResponse = []
     elif pulseResponse == 0:
         responseMessage1 = "No News Found"
         pulseResponse = []
-
+    print(newsApiResponse)
+    print(pulseResponse)
     finalNews = newsApiResponse + pulseResponse
     return finalNews, responseMessage1, responseMessage2

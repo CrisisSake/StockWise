@@ -9,18 +9,14 @@ def get_pulse():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1'
+        'Accept-Encoding': 'identity',
+        'Connection': 'keep-alive'
     }
     try:
         session = requests.Session()
         response = session.get(url, headers=headers)
         response.raise_for_status()
+        response.encoding = 'utf-8'
         return parse_news_data(response.text)
         
     except requests.exceptions.RequestException as e:
@@ -28,6 +24,7 @@ def get_pulse():
 
 def parse_news_data(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
+    print(soup)
     news_container = soup.find('ul', id='news')
     if not news_container:
         return -2;
@@ -57,7 +54,7 @@ def parse_news_data(html_content):
                 similar_text = similar_title.get_text().strip()
                 if similar_text:  # Only add if there's content
                     news_data.append(similar_text)
-    
+    print(news_data)
     return news_data
 
 # Example usage
@@ -75,3 +72,6 @@ def getResponsePulse(companyName):
         return finalList
     else:
         return 0 #No News Regarding Given Company Name
+
+if __name__ == "__main__":
+    print(len(getResponsePulse("tata")))
