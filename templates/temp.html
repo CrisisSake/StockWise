@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock-Wise</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            color: #04006f;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #b6fff2, #b78ff8, #e099ff);
+            animation: gradientMove 10s linear infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            font-size: 2rem;
+            width: 100%;
+        }
+
+        .header h1 {
+            color: #04006f;
+            font-size: 4.5rem;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            position: relative;
+            margin: 30px 0;
+            max-width: 800px;
+            height: 4.5rem;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.3rem;
+            width: 100%;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #1f0085;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            top: 100%;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .stock-display {
+            margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.202);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 1200px;
+            height: 400px;
+            text-align: center;
+            display: none;
+        }
+
+        .stock-display h3 {
+            margin-bottom: 15px;
+        }
+
+        .stock-table {
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .stock-table text-center{
+            font-weight: bold;
+        }
+
+        .table {
+            font-size: 1rem;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .table th {
+            font-size: 1.8rem;
+        }
+
+        .table td {
+            font-size: 1.3rem;
+            height: 4rem;
+        }
+
+        .anaylysisSentFin {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2rem;
+        }
+
+        .anaylysisSentFinHeading {
+            font-weight: bold;
+            font-size: 2rem;
+        }
+
+        .Positive {
+            color: #06a900;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .Negative {
+            color: #df0000;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .Nuetral {
+            margin-top: 1rem;
+            color: #004993;
+            font-weight: 600;
+        }
+
+        .sentData, .finData{
+            font-size: 1.8rem;
+            margin-top: 4rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #1f0085;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Stock-Wise</h1>
+        <p>Together we help you predict your future portfolio</p>
+    </header>
+
+    <div class="search-bar container">
+        <input type="text" id="companySearch" placeholder="Search for a Company..." class="form-control" data-bs-toggle="dropdown" aria-expanded="false">
+        <div id="dropdownMenu" class="dropdown-menu"></div>
+        <button type="button">Search</button>
+    </div>
+    <div id="loadingSpinner" class="loading-spinner"></div>
+
+    <div class="stock-display container">
+        <div class="anaylysisSentFin">
+            <div class="sentiment anaylysisSentFinHeading">
+                <p>Sentiment Analysis</p>
+                <div class="sentData">
+                    <div class="Positive">Positive 98%</div>
+                    <div class="Nuetral">Nuetral 60%</div>
+                    <div class="Negative">Negative 17%</div>
+                </div>
+            </div>
+            <div class="Financial anaylysisSentFinHeading">
+                <p>Financial Analysis</p>
+                <div class="finData">
+                    <div class="finNeg Negative">The Price Will be Falling Down</div>
+                    <div class="finPos Positive">The Price Will be Going Up</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stock-table container">
+        <h2 class="text-center mb-4">Detailed Analysis</h2>
+        <table class="table table-hover table-dark">
+            <thead>
+                <tr>
+                    <th>News</th>
+                    <th>Sentiment</th>
+                </tr>
+            </thead>
+            <tbody id="trending-stocks"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        function updateNewsLabels(newsLabels) {
+            const tableBody = document.getElementById("trending-stocks");
+            tableBody.innerHTML = "";
+
+            newsLabels.forEach(stock => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${stock.name}</td>
+                    <td>${stock.symbol}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        const companyNames = [
+            // A
+            "Adani:ADANIGREEN.NS", "Asian Paints:ASIANPAINT.NS", "Apollo:APOLLOHOSP.NS", "Axis Bank:AXISBANK.NS", 
+            "Airtel:AIRTEL.NS", "Avenue Supermarts:D MART.NS", "Aurobindo Pharma:AUROPHARMA.NS", "Amara Raja Batteries:AMARAJABAT.NS",
+            "Ashok Leyland:ASHOKLEY.NS", "Aarti Industries:AARTIIND.NS", "ABB India:ABB.NS", "Astral Poly Technik:ASTRAL.NS", 
+            
+            // B
+            "Bajaj Auto:BAJAJAUTO.NS", "Bajaj Finance:BAJFINANCE.NS", "Bajaj Finserv:BAJAJFINSV.NS", "Bajaj Holdings:BAJAJHLDNG.NS",
+            "Balaji Telefilms:BALAJITELE.NS", "Balrampur Chini Mills:BALRAMCHIN.NS", "Bank of Baroda:BANKBARODA.NS", "Bank of India:BANKINDIA.NS", 
+            "BASF India:BASF.NS", "Bata:BATAINDIA.NS", "BEML:BEML.NS", "Berger Paints:BERGEPAINT.NS", 
+            "BGR Energy:BGRENERGY.NS", "Bharti Airtel:BHARTIARTL.NS", "Biocon:BIOCON.NS", "Birlasoft:BIRLASOFT.NS", 
+            "Blue Dart Express:BLUEDART.NS", "Bombay Dyeing & Manufacturing:BOMDYEING.NS", "Bosch:BOSCHLTD.NS", "Britannia Industries:BRITANNIA.NS",
+            
+            // C
+            "Cipla:CIPLA.NS", "Coal India:COALINDIA.NS", "Cadila Healthcare:CADILAHC.NS", "Canara Bank:CANBK.NS", 
+            "Cognizant Technology Solutions:CTSH.NS", "Central Bank of India:CBI.NS", "Chambal Fertilizers & Chemicals:CHAMBLFERT.NS", 
+            "Coromandel International:COROMANDEL.NS", "Container Corporation of India:CONCOR.NS", "Cairn India:CAIRN.NS", 
+            "Cement Corporation of India:CCI.NS", "Colgate-Palmolive India:COLPAL.NS", "Cyient:CYIENT.NS", "Clariant Chemicals (India):CLARIANT.NS", 
+            "Chola Mandlam Investment:CHOLAMANDALAM.NS", "Cox & Kings:COX&KINGS.NS", "Coforge:COFORGE.NS", "Concord Biotech:CONCORDBIO.NS", "Gujarat Fluorochemicals:GFL.NS",
+            
+            // D
+            "Dabur India:DABUR.NS", "Deepak Nitrite:DEEPAKNTR.NS", "Dr. Reddy’s Laboratories:DRREDDY.NS", "DHL Express India Pvt..:DHL.NS",
+            "Divis Laboratories:DIVISLAB.NS", "D-Mart:DMART.NS", "Delhivery:DELHIVERY.NS", "Dixon Technologies:DIXON.NS", 
+            "DSP BlackRock:DSPBLACKROCK.NS", "Durable:DURABLE.NS", "Dabur:DABUR.NS", "Dr. Lal PathLabs:DRL.NS", "Dynacons Systems & Solutions:DYNACONS.NS", 
+            
+            // E
+            "Eicher Motors:EICHERMOT.NS", "Emami:EMAMI.NS", "Engineers India:ENGINERSIND.NS", "Escorts:ESCORTS.NS",
+            "Exide Industries:EXIDEIND.NS", "Eros International Media:EROSINTL.NS", "Edelweiss Financial Services:EDELWEISS.NS",
+            
+            // F
+            "Forest Essentials:FORESTESS.NS", "Franklin Templeton:FRANKLINTEM.NS", "Future Group:FUTURE.NS", "FMCG:FMCG.NS",
+            
+            // G
+            "GAIL India:GAIL.NS", "Glenmark Pharmaceuticals:GLENMARK.NS", "Godrej Consumer Products:GODREJCP.NS", "Grasim Industries:GRASIM.NS", 
+            "Gujarat Gas:GUJARATGAS.NS", "GMR Infrastructure:GMRINFRA.NS", "GlaxoSmithKline Pharmaceuticals:GSKPHARMA.NS", 
+            "General Electric India Pvt..:GE.IN.NS", "GIC Reinsurance:GICRE.NS", "Gokaldas Exports:GOKEX.NS", 
+            
+            // H
+            "HDFC Bank:HDFCBANK.NS", "Hindustan Unilever:HINDUNILVR.NS", "Hero MotoCorp:HEROMOTOCO.NS", "Hindalco Industries:HINDALCO.NS", 
+            "HDFC:HDFC.NS", "Hindustan Zinc:HINDZINC.NS", "Havells India:HAVELLS.NS", "Hyderabad Industries:HYDERIND.NS", 
+            
+            // I
+            "Indian Oil Corporation:IOC.NS", "ICICI Bank:ICICIBANK.NS", "ITC:ITC.NS", "Infosys:INFY.NS", 
+            "IndusInd Bank:INDUSINDBK.NS", "IDFC:IDFC.NS", "Indoco Remedies:INDOCO.NS", "Indian Hotels Company:INDHOTELS.NS", 
+            "IRCTC:IRCTC.NS", "Inox Leisure:INOXLEISUR.NS",
+            
+            // J
+            "Jagran Prakashan:JAGRAN.NS", "Jubilant Foodworks:JUBI.NS", "Jindal Steel & Power:JINDALSTEL.NS", 
+            "JPMorgan Chase:JPM.NS", "JSW Steel:JSWSTEEL.NS", "JCT Limited:JCT.NS", 
+            
+            // K
+            "Karnataka Bank:KARNATACABK.NS", "Kotak Mahindra Bank:KOTAKBANK.NS", "Kirloskar Brothers:KIRLOSKAR.NS", "KSB Pumps:KSBPUMPS.NS", 
+            "Kalpataru Power Transmission:KALPATPOWR.NS", "Kamdhenu:KAMDHENU.NS", "Kothari Petrochemicals:KOTHARIPETRO.NS", 
+            
+            // L
+            "L&T:LT.NS", "Lupin:LUPIN.NS", "LIC Housing Finance:LICHSGFIN.NS", "Larsen & Toubro:L&T.NS", "Leela Hotels:LEELA.NS", 
+            "L&T Infotech:LTI.NS", "Laxmi Organic Industries:LAXMIORG.NS",
+            
+            // M
+            "Mahindra & Mahindra:MAHINDRA.NS", "Maruti Suzuki India:MARUTI.NS", "Muthoot Finance:MUTHOOTFIN.NS", "Mindtree:MINDTREE.NS", 
+            "MRF:MRF.NS", "Max Financial Services:MAXFINSERV.NS", "Mangalore Refinery and Petrochemicals:MRPL.NS", 
+            "Minda Industries:MINDACORP.NS", "Motilal Oswal Financial Services:MOTILALOFS.NS", 
+            
+            // N
+            "NCC:NCC.NS", "NSE India:NSE.NS", "NTPC:NTPC.NS", "Nestle India:NESTLEIND.NS", "Nerolac Paints:NEROLAC.NS", 
+            "Novartis India:NOVARTIS.NS", "Nagarjuna Fertilizers:NAGAFERT.NS", 
+            
+            // O
+            "ONGC:ONGC.NS", "Oracle Financial Services:ORACLE.NS", "Oberoi Hotels:OBEROIRL.NS", 
+            
+            // P
+            "Patanjali Ayurved:PATANJALI.NS", "Piramal Enterprises:PIRAMAL.NS", "Power Grid Corporation of India:POWERGRID.NS", 
+            "Punjab National Bank:PNB.NS", "PVR:PVR.NS", 
+            
+            // Q
+            "Quality Chemicals:QUALITYCHEM.NS", 
+            
+            // R
+            "Reliance Industries:RELIANCE.NS", "RBL Bank:RBLBANK.NS", "Ruchi Soya Industries:RUCHISOYA.NS", "Ramco Cements:RAMCOCEM.NS", 
+            "Relaxo Footwears:RELAXO.NS", "Rural Electrification Corporation:RECL.NS", "Rossari Biotech:ROSSARI.NS", "Repro India:REPRO.NS", 
+            
+            // S
+            "SBI Life Insurance:SBILIFE.NS", "Sundaram Finance:SUNDARAMFIN.NS", "Shriram Transport Finance:SRTRANSFIN.NS", 
+            "SBI Cards & Payment Services:SBICARD.NS", "Syngene International:SYNGENE.NS", "Sesa Goa:SESA.NS", 
+            "Shree Cements:SHREECEM.NS", "Shree Renuka Sugars:RENUKA.NS", 
+            
+            // T
+            "Tata Steel:TATASTEEL.NS", "TCS:TCS.NS", "Titan Company:TITAN.NS", "Tech Mahindra:TECHM.NS", "Trent:TRENT.NS", 
+            "Thermax:THERMAX.NS", "The Indian Hotels Company:INDHOTELS.NS",
+            
+            // U
+            "Ujjivan Financial Services:UJJIVAN.NS", "United Breweries:UBL.NS", "UltraTech Cement:ULTRACEMCO.NS", 
+            
+            // V
+            "Vedanta:VEDANTA.NS", "V-Mart Retail:VMART.NS", "Varun Beverages:VARUNBEV.NS", "Vodafone Idea:IDEA.NS", 
+            
+            // W
+            "Wipro:WIPRO.NS", "Whirlpool India:WHIRLPOOL.NS", "Welspun India:WELSPUNIND.NS", 
+            
+            // X
+            "Xerox India:XEROX.NS", 
+            
+            // Y
+            "Yes Bank:YESBANK.NS", 
+            
+            // Z
+            "Zee Entertainment Enterprises:ZEE.NS", "Zydus Cadila:ZYDUSCADILA.NS", "Zensar Technologies:ZENSARTECH.NS", "Zodiac Clothing Co:ZODIACCLTH.NS"
+        ];
+
+
+
+
+        function filterCompanies(query) {
+            const filteredCompanies = companyNames.filter(name => 
+                name.toLowerCase().startsWith(query.toLowerCase())
+            );
+            return filteredCompanies;
+        }
+
+        function displaySuggestions(companies) {
+            const dropdown = document.getElementById("dropdownMenu");
+            dropdown.innerHTML = "";
+            companies.forEach(company => {
+                const item = document.createElement("a");
+                item.classList.add("dropdown-item");
+                item.textContent = company;
+                item.href = "#";
+                item.addEventListener("click", () => {
+                    document.getElementById("companySearch").value = company;
+                    dropdown.innerHTML = "";
+                });
+                dropdown.appendChild(item);
+            });
+        }
+
+        document.getElementById("companySearch").addEventListener("input", (e) => {
+            const query = e.target.value;
+            const dropdown = new bootstrap.Dropdown(e.target);
+            if (query) {
+                const suggestions = filterCompanies(query);
+                displaySuggestions(suggestions);
+                dropdown.show();
+            } else {
+                document.getElementById("dropdownMenu").innerHTML = "";
+                dropdown.hide();
+            }
+        });
+
+        document.querySelector(".search-bar button").addEventListener("click", async () => {
+            const searchQuery = document.getElementById("companySearch").value;
+            if (!searchQuery) {
+                alert("Please enter a company name");
+                return;
+            }
+            document.querySelector(".stock-display").style.display = "none";
+            document.querySelector(".stock-table").style.display = "none";
+            // Show the loading animation
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            loadingSpinner.style.display = "block";
+
+            // Simulate calling the backend (e.g., MyFxn) with a delay of 5 seconds
+            const sentimentData = await fetchSentimentData(searchQuery);
+
+            // Hide the loading animation and show the result
+            loadingSpinner.style.display = "none";
+            displayResult(sentimentData);
+        });
+
+        async function fetchSentimentData(query) {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await response.json();
+                return data
+            }
+
+        function displayResult(sentimentData) {
+            const [sentimentPercentages, newsLabels, nextDayBinary] = sentimentData;
+            console.log(sentimentPercentages,newsLabels,nextDayBinary)
+            document.querySelector(".stock-display").style.display = "block";
+            document.querySelector(".stock-table").style.display = "block";
+            // Display the sentiment percentages
+            document.querySelector(".Positive").textContent = `Positive ${parseInt(sentimentPercentages.Positive)}`;
+            document.querySelector(".Nuetral").textContent = `Neutral ${parseInt(sentimentPercentages.Neutral)}`;
+            document.querySelector(".Negative").textContent = `Negative ${parseInt(sentimentPercentages.Negative)}`;
+            // Display the News Labels
+            const newsItems = newsLabels.split('<><>');
+            const newsArray = newsItems.map(item => {
+                const [name, symbol] = item.split(';;;');
+                return { name, symbol };
+            });
+            console.log(newsArray)
+            updateNewsLabels(newsArray)
+            // Set Financial Data
+            if (parseInt(nextDayBinary) >= 0) {
+                document.querySelector(".finNeg").style.display = "none";
+                document.querySelector(".finPos").style.display = "block";
+            } else {
+                document.querySelector(".finNeg").style.display = "block";
+                document.querySelector(".finPos").style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

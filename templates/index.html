@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+</head>
+<body>
+    <h1>Search Page</h1>
+    <input type="text" id="search-bar" placeholder="Enter text" />
+    <button onclick="submitForm()">Submit</button>
+    
+    <p id="result"></p>
+    <p id="loading" style="display:none;">Loading...</p>
+
+    <script>
+        async function submitForm() {
+            // Show loading message
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").textContent = "";
+
+            const text = document.getElementById("search-bar").value;
+
+            // Send the search text to the backend
+            const response = await fetch('/submit', {
+                method: 'POST',
+                body: JSON.stringify({ text })
+            });
+
+            // Hide loading message after receiving response
+            document.getElementById("loading").style.display = "none";
+
+            if (response.ok) {
+                const result = await response.json();
+                document.getElementById("result").textContent = result;
+            } else {
+                document.getElementById("result").textContent = "Error processing request.";
+            }
+        }
+    </script>
+</body>
+</html>

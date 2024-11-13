@@ -1,10 +1,10 @@
-from newsAPi import getResponseNewsApi
-from pulseNews import getResponsePulse
+from . import newsAPi
+from . import pulseNews
 
 def handleNewsResponse(companyName):
     
-    newsApiResponse = getResponseNewsApi(companyName)
-    pulseResponse = getResponsePulse(companyName)
+    newsApiResponse = newsAPi.getResponseNewsApi(companyName)
+    pulseResponse = pulseNews.getResponsePulse(companyName)
     
     responseMessage1 = ""
     responseMessage2 = ""
