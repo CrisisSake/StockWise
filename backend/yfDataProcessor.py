@@ -1,10 +1,14 @@
 import yfinance as yf
+import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 def downloadData(tickerName):
     try:
         data = yf.download(tickers=tickerName, period='2y', interval='1d', threads=True)
+        # Flatten MultiIndex columns from newer yfinance versions
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = data.columns.get_level_values(0)
         return data
     except:
         return -1
@@ -19,12 +23,17 @@ def processData(tickerName):
     data['MACD'] = data['Close'].ewm(span=12, adjust=False).mean() - data['Close'].ewm(span=26, adjust=False).mean()
     data['Bollinger_Upper'] = data['Close'].rolling(window=20).mean() + (data['Close'].rolling(window=20).std() * 2)
     data['Bollinger_Lower'] = data['Close'].rolling(window=20).mean() - (data['Close'].rolling(window=20).std() * 2)
-    data['TargetNextClose'] = data['Adj Close'].shift(-1)
+    # Newer yfinance no longer provides 'Adj Close', use 'Close' instead
+    adj_close_col = 'Adj Close' if 'Adj Close' in data.columns else 'Close'
+    data['TargetNextClose'] = data[adj_close_col].shift(-1)
     data.dropna(inplace=True)
     data.reset_index(inplace=True)
 
     # Selecting features for the model
-    data = data[['Open', 'High', 'Low', 'Adj Close', 'EMAF', 'EMAM', 'EMAS', 'RSI', 'MACD', 'Bollinger_Upper', 'Bollinger_Lower', 'TargetNextClose']]
+    adj_close_col = 'Adj Close' if 'Adj Close' in data.columns else 'Close'
+    data = data[['Open', 'High', 'Low', adj_close_col, 'EMAF', 'EMAM', 'EMAS', 'RSI', 'MACD', 'Bollinger_Upper', 'Bollinger_Lower', 'TargetNextClose']]
+    # Rename to 'Adj Close' for consistency downstream
+    data = data.rename(columns={adj_close_col: 'Adj Close'})
     data_set = data.iloc[:, :-1]   # Exclude target column from features
     return data_set
 
